@@ -50,3 +50,33 @@ for number in americaStates.values {
 print(numberTemp)
 
 
+
+var groceryBag = Set<String>()
+groceryBag.insert("Apples")
+groceryBag.insert("Oranges")
+groceryBag.insert("Pineapple")
+
+let friendsGrceryBag = Set(["Bananas","Cereal","Milk","Oranges"])
+let commonGroceryBag = groceryBag.union(friendsGrceryBag)
+
+let roomateGroceryBag = Set(["Apples","Bananas","Cereal","Toothpaste"])
+let itemsToReturn = commonGroceryBag.intersection(roomateGroceryBag)
+
+let mySecondBag = Set(["Berries","Yogurt"])
+let roomatesSecondBag = Set(["Grapes", "Honey"])
+let disjoint = mySecondBag.isDisjoint(with: roomatesSecondBag)
+
+// Ch11 예선과제
+let myCities = Set(["Atlanta","Chicago","Jacksonville","New York","San Francisco"])
+let yourCities = Set(["Chicago","San Francisco","Jacksonville"])
+
+let check = myCities.isSuperset(of: yourCities)
+
+// Ch11 본선과제
+var myGroceryBag: Set = ["Apples", "Oranges", "Pineapples"]
+let otherFriendsGroceryBag = Set(["Bananas", "Cereal", "Milk", "Oranges"])
+let otherRoommatesGroceryBag = Set(["Apples", "Bananas", "Cereal", "Toothpaste"])
+
+myGroceryBag.formUnion(otherFriendsGroceryBag)
+myGroceryBag.formIntersection(otherRoommatesGroceryBag)
+
