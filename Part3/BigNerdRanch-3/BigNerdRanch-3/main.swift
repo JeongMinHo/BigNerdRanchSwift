@@ -33,3 +33,20 @@ toDoList.reverse()
 // Ch9 결승 과제
 var bucketIndex = bucketList.firstIndex(of: "Fly hot air balloon to Fiji") ?? 0
 print(bucketIndex)
+
+
+// Ch10 본선 과제
+var americaStates = [
+    "Los Angelas" : [30306, 30307, 30308, 30309, 30310],
+    "Washington" : [30311,30312,30313,30314,30315],
+    "Boston" : [30301,30302,30303,30304,30305]
+]
+
+var numberTemp = [Int]()
+
+for number in americaStates.values {
+    numberTemp += Array(number)
+}
+print(numberTemp)
+
+
