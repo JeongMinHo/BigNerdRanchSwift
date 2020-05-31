@@ -80,3 +80,36 @@ let otherRoommatesGroceryBag = Set(["Apples", "Bananas", "Cereal", "Toothpaste"]
 myGroceryBag.formUnion(otherFriendsGroceryBag)
 myGroceryBag.formIntersection(otherRoommatesGroceryBag)
 
+
+// Ch12 예선과제
+func greetMiddleName(fromFullName name: (first: String, middle: String?, last: String)) {
+    guard let middleName = name.middle, middleName.count >= 4 else {
+        print("Hey there")
+        return
+    }
+    print("Hey \(middleName)")
+}
+
+// Ch12 본선과제
+func siftBeans(fromGroceryList list: [String]) -> (beans: [String], otherGroceries: [String]) {
+    var beans: [String] = []
+    var otherGroceries: [String] = []
+    list.forEach {
+        if $0.hasSuffix("beans") {
+            beans.append($0)
+        } else {
+            otherGroceries.append($0)
+        }
+    }
+    return (beans, otherGroceries)
+}
+
+let result = siftBeans(fromGroceryList: ["green beans",
+                                         "milk",
+                                         "black beans",
+                                         "pinto beans",
+                                         "apples"
+])
+
+print(result.beans)
+print(result.otherGroceries)
