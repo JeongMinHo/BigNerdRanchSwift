@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		E3DE97BB2485071300C949A2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97BA2485071300C949A2 /* main.swift */; };
+		E3DE97C224854EBD00C949A2 /* Town.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C124854EBD00C949A2 /* Town.swift */; };
+		E3DE97C42485514700C949A2 /* Monster.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C32485514700C949A2 /* Monster.swift */; };
+		E3DE97C6248553B500C949A2 /* Zombie.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C5248553B500C949A2 /* Zombie.swift */; };
+		E3DE97C8248559FA00C949A2 /* Vampire.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C7248559FA00C949A2 /* Vampire.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +29,10 @@
 /* Begin PBXFileReference section */
 		E3DE97B72485071300C949A2 /* BigNerdRanch-4 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "BigNerdRanch-4"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E3DE97BA2485071300C949A2 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		E3DE97C124854EBD00C949A2 /* Town.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Town.swift; sourceTree = "<group>"; };
+		E3DE97C32485514700C949A2 /* Monster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Monster.swift; sourceTree = "<group>"; };
+		E3DE97C5248553B500C949A2 /* Zombie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zombie.swift; sourceTree = "<group>"; };
+		E3DE97C7248559FA00C949A2 /* Vampire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vampire.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +66,10 @@
 			isa = PBXGroup;
 			children = (
 				E3DE97BA2485071300C949A2 /* main.swift */,
+				E3DE97C32485514700C949A2 /* Monster.swift */,
+				E3DE97C5248553B500C949A2 /* Zombie.swift */,
+				E3DE97C124854EBD00C949A2 /* Town.swift */,
+				E3DE97C7248559FA00C949A2 /* Vampire.swift */,
 			);
 			path = "BigNerdRanch-4";
 			sourceTree = "<group>";
@@ -121,6 +133,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E3DE97BB2485071300C949A2 /* main.swift in Sources */,
+				E3DE97C6248553B500C949A2 /* Zombie.swift in Sources */,
+				E3DE97C42485514700C949A2 /* Monster.swift in Sources */,
+				E3DE97C8248559FA00C949A2 /* Vampire.swift in Sources */,
+				E3DE97C224854EBD00C949A2 /* Town.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
