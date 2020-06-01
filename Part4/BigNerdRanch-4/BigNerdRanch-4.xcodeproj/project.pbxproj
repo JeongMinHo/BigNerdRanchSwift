@@ -12,6 +12,7 @@
 		E3DE97C42485514700C949A2 /* Monster.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C32485514700C949A2 /* Monster.swift */; };
 		E3DE97C6248553B500C949A2 /* Zombie.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C5248553B500C949A2 /* Zombie.swift */; };
 		E3DE97C8248559FA00C949A2 /* Vampire.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C7248559FA00C949A2 /* Vampire.swift */; };
+		E3DE97CA248576BA00C949A2 /* Mayor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3DE97C9248576BA00C949A2 /* Mayor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,7 @@
 		E3DE97C32485514700C949A2 /* Monster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Monster.swift; sourceTree = "<group>"; };
 		E3DE97C5248553B500C949A2 /* Zombie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zombie.swift; sourceTree = "<group>"; };
 		E3DE97C7248559FA00C949A2 /* Vampire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vampire.swift; sourceTree = "<group>"; };
+		E3DE97C9248576BA00C949A2 /* Mayor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mayor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +51,7 @@
 		E3DE97AE2485071300C949A2 = {
 			isa = PBXGroup;
 			children = (
+				E3DE97C9248576BA00C949A2 /* Mayor.swift */,
 				E3DE97B92485071300C949A2 /* BigNerdRanch-4 */,
 				E3DE97B82485071300C949A2 /* Products */,
 			);
@@ -134,6 +137,7 @@
 			files = (
 				E3DE97BB2485071300C949A2 /* main.swift in Sources */,
 				E3DE97C6248553B500C949A2 /* Zombie.swift in Sources */,
+				E3DE97CA248576BA00C949A2 /* Mayor.swift in Sources */,
 				E3DE97C42485514700C949A2 /* Monster.swift in Sources */,
 				E3DE97C8248559FA00C949A2 /* Vampire.swift in Sources */,
 				E3DE97C224854EBD00C949A2 /* Town.swift in Sources */,

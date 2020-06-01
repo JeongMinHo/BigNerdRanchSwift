@@ -10,8 +10,14 @@ import Foundation
 
 // Ch15 예선과제
 class Zombie: Monster {
-    var walksWithLimp = true
+    internal private(set) var isFallingApart = false
     
+    class var noise: String {
+        return "Woo..."
+    }
+    
+    var walksWithLimp = true
+
     override func terriorizeTown() {
         
         guard let population = town?.population else { return }

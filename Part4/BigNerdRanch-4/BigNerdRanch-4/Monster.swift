@@ -12,6 +12,15 @@ class Monster {
     var town: Town?
     var name = "Monster"
     
+    var victimPool: Int {
+        get {
+            return town?.population ?? 0
+        }
+        set(newVictimPool) {
+            town?.population = newVictimPool
+        }
+    }
+    
     func terriorizeTown() {
         if town != nil {
             print("\(name) is terrorizing a town!")
