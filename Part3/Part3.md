@@ -402,3 +402,231 @@ if let theName = middleName {
 - ~~~swift
   let evenOddFunction: ([Int]) -> ([Int], [Int]) = sortedEvenOddNumbers
   ~~~
+
+
+
+#CHATER 13(클로저)
+
+- **클로저(Closure)** 는 애플리케이션에서 특정 태스크를 수행하기 위해 사용될 수 있는 각종 기능들의 개별 묶음을 말한다.
+- 함수는 클로저의 종류이며, 다른 말로 하면 *이름 있는 클로저* 라고 할 수 있다.
+- 클로저는 문법 구조가 간결하다는 점에서 함수와 다르다. 함수를 정의할 때처럼 이름을 지정한다거나 온전한 선언 구조를 따르지 않아도 함수와 비슷한 구조를 만들 수 있다는 것이 클로저의 장점이다. 
+- 유연성 높은 클로저의 구조 덕분에 함수의 인수나 리턴값을 쉽게 전달할 수 있다.
+
+
+
+
+
+### 클로저 수식 문법
+
+~~~swift
+{(parameters) -> return type in
+	// 코드
+}
+~~~
+
+- *in* 키워드는 클로저의 파라미터와 리턴 타입을 실행 코드와 구별하기 위해 사용된다.
+
+~~~swift
+let volounteerCounts = [1,3,40,32,2,53]
+
+func sortAscending(_ i: Int, _ j: Int) -> Bool {
+    return i < j
+}
+var volounteersSorted = volounteerCounts.sorted(by: sortAscending(_:_:))
+
+// 클로저 형식으로 바꿔보기
+let volounteersSorted = volounteerCounts.sorted { (i: Int, j: Int) -> Bool in
+    return i < j
+}
+
+// 타입 추론 활용하기
+let volounteersSorted = volounteerCounts.sorted { (i, j) in i < j }
+
+// 축약형 인수명 문법 구조 적용하기
+let volounteersSorted = volounteerCounts.sorted { $0 < $1 }
+~~~
+
+- 파라미터와 리턴값의 타입 정보를 제거했다. 리턴 타입을 제거할 수 있는 이유는 i <  j 라는 수식의 결과가 **Bool** 인스턴스임을 컴파일러가 알기 때문이다.
+- 모든 클로저 수식에서 return 키워드를 생략할 수 있는 것은 아니다. 여기서는 수식이 하나뿐(i < j) 이라 생략이 가능하다. 수식이 여렷이라면 명시적으로 return 키워드가 필요하다.
+
+- 축약형 인수명은 지금까지 사용한 명시적 인수 선언, 즉 타입과 값이 서로 짝이 맞다는 규칙과 비슷하다. *컴파일러의 타입 추론 기능을 적용하면 클로저가 받는 인수의 개수와 타입을 쉽게 알 수 있으므로 굳이 이름을 지정할 필요가 없어진다.*
+
+- **후행 클로저 문법 구조** 를 채택하여 클로저가 함수의 마지막 인수에 전달될 때는 함수의 괄호 밖이나 다음에 인라인으로 작성할 수 있다. 
+
+
+
+
+
+### 리턴 타입 역할을 하는 함수
+
+- 함수는 리턴값으로 다른 함수를 리턴할 수 있다.
+
+~~~swift
+func makeTownGrand() -> (Int, Int) -> Int {
+    func buildRoads(byAddingLights lights: Int, toExistingLights existingLights: Int) -> Int {
+        return lights + existingLights
+    }
+    return buildRoads(byAddingLights:toExistingLights:)
+}
+
+var stopLights = 4
+let townPlanByAddingLights = makeTownGrand()
+stopLights = townPlanByAddingLights(4, stopLights)
+print("Knowhere has \(stopLights) stoplights") // Knowhere has 8 stoplights
+~~~
+
+- makeTownGrand() 함수는 인자가 없다. 하지만 **리턴값은 함수** 이다. 이 함수는 정수인 두 개의 인수를 받아 정수를 리턴한다.
+
+- townPlanByAddingLights 상수는 makeTownGrand() 함수가 만든 buildRoads 함수를 가리킨다.
+
+
+
+
+
+### 인수 역할을 하는 함수
+
+- 함수는 다른 함수의 인수가 될 수 있다. 예를들어 sorted(by:) 에 sortAscending(_:_:) 함수를 인수로 제공했다.
+
+~~~swift
+func makeTownGrand(withBudget budget: Int, condition: (Int) -> Bool) -> ((Int, Int) -> Int)? {
+    if condition(budget) {
+        func buildRoads(byAddingLights lights: Int, toExistingLights existingLights: Int) -> Int {
+            return lights + existingLights
+        }
+        return buildRoads(byAddingLights:toExistingLights:)
+    } else {
+        return nil
+    }
+}
+
+func evaluate(budget: Int) -> Bool {
+    return budget > 10000
+}
+
+var stoplights = 4
+if let townPlanByAddingLights = makeTownGrand(withBudget: 1000, condition: evaluate(budget:)) {
+    stoplights = townPlanByAddingLights(4, stoplights)
+}
+print("Knowhere has \(stoplights) stoplights.") // Knowhere has 4 stoplights.
+~~~
+
+
+
+
+
+### 클로저, 값을 붙잡다
+
+- 클로저와 함수는 자신의 영역에서 정의된 변수에 캡슐화된 내부 정보를 추적할 수 있다.
+
+~~~swift
+func makePopulationTracker(forInitialPopulation population: Int) -> (Int) -> Int {
+    var totalPopulation = population
+    func populationTracker(growth: Int) -> Int {
+        totalPopulation += growth
+        return totalPopulation
+    }
+    return populationTracker(growth:)
+}
+
+var currentPopulation = 5422
+let growBy = makePopulationTracker(forInitialPopulation: currentPopulation)
+growBy(500)
+growBy(500)
+growBy(500)
+currentPopulation = growBy(500)
+print(currentPopulation) // 7422
+~~~
+
+- growBy(_:) 를 4번 호출하여 2000명이 증가하게 된다.
+- 인구를 업데이트 하기 위해서는 currentPopulation에 함수의 결과를 대입하면 된다.
+
+
+
+### 클로저는 참조 타입이다 !
+
+- 클로저는 *참조 타입(reference type)* 이다. 함수를 상수나 변수에 대입하면 실세로는 상수나 변수가 그 함수를 가리키도록 설정되는 것이다. 다만 함수의 복사본이 만들어진 것은 아니다.
+
+  - 함수의 영역에서 붙잡힌 정보는 무엇이 됐든 새 상수나 변수를 통해 호출하면 변경된다.
+
+    ~~~swift
+    var currentPopulation = 5422
+    let growBy = makePopulationTracker(forInitialPopulation: currentPopulation)
+    growBy(500)
+    growBy(500)
+    growBy(500)
+    currentPopulation = growBy(500)
+    
+    let anotherGrowBy = growBy 
+    anotherGrowBy(500) // totalPopulation은 7922가 된다
+    ~~~
+
+  - 이렇게 하면 anotherGrowBy는 growBy와 같은 함수를 가리킨다.  따라서 anotherGrowBy(_:)를 호출하고 500을 인수로 전달하면 totalPopulation은 500 증가한다. 하지만 currentPopulation의 값은 변하지 않는다. -> 그 값을 anotherGrowBy(_:)의 리턴값으로 설정하지 않았기 때문이다.
+
+  - anotherGrowBy는 populationTracker(growth:) 함수의 영역에 붙잡힌 totalPopulation 내부 변수의 값을 직접 늘릴 뿐이다.
+
+
+
+### 함수형 프로그래밍
+
+- Swift는 *함수형 프로그래밍(functional programming)* 이라는 패러다임의 패턴을 일부 도입했다.
+  1. **일급 함수(first-class function)** : 다른 타입처럼 다른 함수에서 리턴되거나 인수로 전달될 수도 있고 변수에 저장될 수도 있는 함수다.
+  2. **순수 함수(pure function)** : 부작용이 없는 함수. 함수는 입력이 같으면 리턴하는 출력도 언제나 같고, 프로그램 내 특정 위치에서 수정되지도 않는다. ex) 피보나치, 팩토리얼을 비록한 수학 함수 대부분은 순수 함수이다.
+  3. **불변경성(immutability)** 
+  4. **강력한 타입 지정(strong typing)** : 강력한 타입 시스템은 코드의 런타임 안정성을 높인다. 프로그래밍 언어의 타입 시스템이 컴파일 타임에 확인되기 때문이다.
+- 함수형 프로그래밍을 적용하면 코드가 간결해지고 표현력이 높아진다. 불변경성과 강력한 컴파일 타임 타입 확인을 강조함으로써 코드는 더더욱 런타임 안정성을 확보하게 된다.
+- 이러한 강점 덕분에 코드는 추론과 유지 보수가 한결 수월해진다.
+
+
+
+### 고차 함수
+
+- **고차 함수(higher-order function)** 은 입력으로 적어도 하나의 함수를 받는다. 
+
+
+
+1. **map(_:)**
+
+   - 배열의 내용물을 변형하는 데 사용하는 함수이다. 
+
+   - 배열의 내용물을 한 값에서 다른 값으로 *매핑하고* , 이 새 값을 새 배열에 넣는 것이다. 고차 함수이므로 배열의 내용물을 어떻게 변형하는지 알려 주는 또 하나의 함수가 제공된다.
+
+   - Swift의 표준 라이브러리는 Array 타입에 map을 구현해 놓았다.
+
+   - ~~~swift
+     let arr1 = [1244,2021,2157]
+     let arr2 = arr1.map { (number: Int) -> Int in
+         return number * 2
+     }
+     print(arr2) // [2488, 4042, 4314]
+     ~~~
+
+2. **filter(_:)**
+
+   - map(_:) 처럼 Array타입의 인스턴스에 호출된다. 그리고 클로저 수식을 인수로 받는다
+
+   - filter(_:)의 목적은 배열을 어떤 기준에 따라 *걸러 내는(filter)* 것이다. 결과 배열은 테스트를 통과한 원래 배열의 값을 담게 된다.
+
+   - ~~~swift
+     let arr1 = [1244,2021,2157]
+     let arr2 = arr1.filter { (num: Int) -> Bool in
+         return num > 2000
+     }
+     print(arr2) // [2021, 2157]
+     ~~~
+
+   - 앞에서 처럼 뒤에 붙는 클로저 문법을 사용했다. 
+
+3. **reduce(_: _ :)**
+
+   - Array 타입의 인스턴스에 reduce(_: _:) 가 호출되면 컬렉션 내 값들을 함수로부터 리턴된 하나의 값으로 *축소(reduce)* 된다.
+
+   - ~~~swift
+     let arr1 = [1244,2021,2157]
+     let arr2 = arr1.reduce(0) { (num1, num2) -> Int in
+         return num1 + num2
+     }
+     print(arr2) // 5422
+     ~~~
+
+   - 첫 번째 인수는 처음에 더해질 수 있는 초기값을 가리킨다. 두 번째 인수는 컬렉션 내 값이 결합되는 방식을 정의하는 클로저이다.
+

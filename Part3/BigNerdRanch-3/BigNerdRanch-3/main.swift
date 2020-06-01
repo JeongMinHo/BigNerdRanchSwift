@@ -111,5 +111,16 @@ let result = siftBeans(fromGroceryList: ["green beans",
                                          "apples"
 ])
 
-print(result.beans)
-print(result.otherGroceries)
+
+// Ch13 예선과제1
+var volounteerCounts = [1,3,40,32,2,53]
+volounteerCounts.sort(by: <)
+print(volounteerCounts)
+
+// Ch13 예선과제2
+var arr1 = [3,2,51,1,6]
+print(arr1.sorted())
+
+// Ch13 결승과제
+let arr2 = [1244,2021,2157]
+let arr3 = arr1.reduce(0, +)
