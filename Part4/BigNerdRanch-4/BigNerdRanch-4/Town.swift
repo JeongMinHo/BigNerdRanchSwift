@@ -10,20 +10,33 @@ import Foundation
 
 struct Town {
     
-    static let region = "South"
+    let region: String
     
-    var mayor = Mayor()
+//    var mayor = Mayor()
     
     // Ch16 예선과제
-    var population = 5422 {
+    var population: Int {
         didSet(oldPopulation) {
             if oldPopulation > population {
                 print("인구가 줄어들었습니다!")
-                mayor.alert()
+//                mayor.alert()
             }
         }
     }
-    var numberOfStoplights = 4
+    var numberOfStoplights: Int
+    
+    init?(region: String, population: Int, stoplights: Int) {
+        guard population > 0 else {
+            return nil
+        }
+        self.region = region
+        self.population = population
+        self.numberOfStoplights = stoplights
+    }
+    
+    init? (population: Int, stoplights: Int) {
+        self.init(population: population, stoplights: stoplights)
+    }
     
     enum Size {
         case small
@@ -52,3 +65,5 @@ struct Town {
         population += amount
     }
 }
+
+

@@ -15,7 +15,7 @@ class Vampire: Monster {
     
     override func terriorizeTown() {
         town?.changePopulation(by: -1)
-        vampires.append(Vampire())
+//        vampires.append(Vampire())
         super.terriorizeTown()
     }
 }

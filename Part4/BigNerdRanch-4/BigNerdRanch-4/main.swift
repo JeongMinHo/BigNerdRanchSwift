@@ -36,3 +36,7 @@ enum ShapeDimensions {
         }
     }
 }
+
+//var myTown = Town(region: "South", population: 2000, stoplights: 5)
+var myTown = Town(region: "South", population: 1, stoplights: 6)
+myTown?.printDescription()
