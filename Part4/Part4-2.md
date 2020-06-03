@@ -318,3 +318,209 @@ myTown?.printDescription()
 
 
 - 이니셜라이저의 파라미터도 대가 원하는 파라미터 이름을 정하는 것이 가능하다.
+
+
+
+
+
+# CHAPTER 18(값 타입 vs 참조 타입)
+
+
+
+### 값의 세만틱스
+
+~~~swift
+var str = "Hello, Swift!"
+var swiftGreeting = str
+swiftGreeting += " How are you?"
+print(str) // Hello, Swift!
+print(swiftGreeting) // Hello, Swift! How are you?
+~~~
+
+- swiftGreeting의 값은 견경됐지만 str은 그대로이다.
+
+  - **값의 세만틱스(value semantics)** 와 관련이 있다.
+
+- String 타입의 정보를 보게 되면 구조체로 설명되어 있다.
+
+  - String은 표준 라이브러리의 **구조체** 로 구현되어 있다. 또한 String은 **값 타입** 이기도 하다.
+
+  - *값 타입은 인스턴스에 대입될 때 또는 함수의 인수로 전달될 때 항상 복사된다.*
+
+  - str을 swiftGreeting에 대입하면 str 값이 swiftGreeting로 복사된다.(**복사본(copy)**)
+
+    -> *같은 인스턴스를 가리키는 것이 아니라는 뜻이다.*
+
+  - 따라서 swiftGreeting의 값을 변경하더라도 str의 값에는 아무런 영향을 미치지 않는다.
+
+- **Swift의 기본 타입인 Array, Dictionary, Int, String 등은 모두 구조체로 구현되어 있다. 따라서 모두 값 타입이다.** 
+
+- *데이터를 구성할  항상 구조체부터 고려해야 하며, 필요할 때만 클래스를 사용하는 것이 바람직하다.*
+
+
+
+### 참조의 세만틱스
+
+- 참조의 세만틱스는 값의 세만틱스와 다르게 동작한다.
+- 값 타입에서는 새 상수나 변수에 값을 대입할 때 인스턴스의 복사본이 사용된다. 
+
+~~~swift
+class GreekGod {
+    var name: String
+    init(name: String) {
+        self.name = name
+    }
+}
+
+let hecate = GreekGod(name: "Hecate")
+let anotherHecate = hecate
+
+anotherHecate.name = "AnotherHecate"
+print(hecate.name) // AnotherHecate
+print(anotherHecate.name) // AnotherHecate
+~~~
+
+- 두 name 프로퍼티는 모두 "AnotherHecate"로 변경되었다.
+- GreekGod(name: "Hecate") 코드에서 GreekGod 클래스의 인스턴스를 만들었다. 
+- *hecate에서처럼 클래스의 인스턴스를 상수나 변수에 대입하면 그 상수나 변수는 인스턴의 참조를 가지게 된다.*
+- **상수나 변수는 참조를 사용하여 메모리 내 클래스의 인스턴스를 가리킨다.**
+
+
+
+### 상수의 값 타입과 참조 타입
+
+- 값 타입과 참조 타입은 상수 일 때 서로 다르게 동작한다.
+
+~~~swift
+struct Pantheon {
+    var chiefGod: GreekGod
+}
+
+let pantheon = Pantheon(chiefGod: hecate)
+let zeus = GreekGod(name: "Zeus")
+pantheon.chiefGod = zeus // Cannot assign to property: 'pantheon' is a 'let' constant
+~~~
+
+- 이 오류는 Pantheon이 immutable 인스턴스라는 의미이다.
+
+
+
+~~~swift
+struct Pantheon {
+    var chiefGod: GreekGod
+}
+
+let pantheon = Pantheon(chiefGod: hecate)
+let zeus = GreekGod(name: "Zeus")
+zeus.name = "Zeus Jr."
+print(zeus.name) // Zeus Jr.
+~~~
+
+- zeus는 let으로 선언되었지만 오류 없이 실행이 가능하다.
+- 값 타입의 인스턴스인 상수는 프로퍼티의 값을 변경할 수 없지만, 참조 타입의 인스턴스인 상수는 변경할 수 있는 이유는 무엇일까?
+  - zeus는 참조 타입의 인스턴스이기 때문에 GreekGod(name: "Zeus") 코드에서 만들어지는 **GreekGod 의 인스턴스**를 가리킨다.
+  - name 프로퍼티에 저장된 값을 변경하면 실제로는 GreekGod의 참조인 zeus가 변경된다.
+  - GreekGod 클래스를 정의할 때 name을 변수로 선언하였다.
+
+
+
+### 값 타입과 참조 타입 함께 사용하기
+
+- 값 타입 안에서 참조 타입을 사용하려면 조심해야 한다.
+  - 참조 타입 안에서 값 타입을 사용할때는 문제가 발생하지는 않는다.
+
+~~~swift
+class GreekGod {
+    var name: String
+    init(name: String) {
+        self.name = name
+    }
+}
+
+let hecate = GreekGod(name: "Hecate")
+let anotherHecate = hecate
+
+anotherHecate.name = "AnotherHecate"
+
+struct Pantheon {
+    var chiefGod: GreekGod
+}
+
+let pantheon = Pantheon(chiefGod: hecate)
+let zeus = GreekGod(name: "Zeus")
+zeus.name = "Zeus Jr."
+
+let greekPantheon = pantheon
+hecate.name = "Trivia"
+print(greekPantheon.chiefGod.name) // Trivia
+~~~
+
+- chiefGod의 타입은 GreekGod이고 GreekGod는 클래스이므로 참조 타입이다.
+
+- 값 타입 안에 참조 타입을 두면 복잡해진다.
+- 값 타입의 인스턴스는 새 변수나 상수에 대입될 때나 함수로 전달될 때 복사한다는 점을 기억해야한다.
+- 프로퍼티로 참조 타입을 가지는 값 타입은 새 변수나 상수를 가리키는 같은 참조를 전달하게 된다.
+  - 이 참조는 원래 참조가 가리켰던 인스턴스를 그대로 가리키므로 무턱대고 참조를 변경하면 예상치 못한 결과를 초래할 수 있다.
+  - 구조체에 참조 타입의 프로퍼티가 필요할 때는 변경 불가능한 인스턴스를 사용하는 것이 최선이다.
+
+
+
+### 복사하기
+
+- 개발자들에게 인스턴스의 복사가 **얇은 복사(shallow copy)** 와 **깊은 복사(deep copy)** 중 어느 경우에 해당하는지는 관심사이기도 하다.
+- *Swift에서는 깊은 복사를 언어 차원에서 지원하지 않으며 얕은 복사다.*
+- **얕은 복사는 인스턴스의 복사본을 별도로 만들지 않는다. 그저 같은 인스턴스를 가리키는 참조가 하나 더 생길 뿐이다.**
+- 반면, **깊은 복사** 는 참조의 목적지에 해당하는 인스턴스를 복제한다. 자체 인스턴스를 가리키는 참조로 새 배열을 만든다.
+
+
+
+### 동일성 vs 정체성
+
+- **동일성(equality)은 텍스트가 같은 String타입의 두 인스턴스처럼 관찰 가능한 특징으로서 두 인스턴스가 동일한 값을 가질 때를 나타낸다.**
+- **정체성(identity)은 두 변수나 상수가 메모리에서 같은 인스턴스를 가리킬 때를 나타낸다.**
+
+~~~swift
+let x = 1
+let y = 1
+print(x==y) // true
+~~~
+
+- 두 인스턴스는 1이라는 같은 값을 가지게 되고 동일하므로 true가 리턴된다.
+  - 두 인스턴스가 같은 값을 가지고 있느냐는 동일성 확인을 통해 우리가 알고자 하는 내용이다.
+  - Swift의 모든 타입(**String, Int, Float, Double, Array, Dictionary**)에는 동일성 확인을 진행할 수 있다.
+
+~~~swift
+print(athena === hecate) // false
+~~~
+
+- 두 상수나 변수가 같은 값을 가지면 서로 동일하다고 할 수 있으나 그 정체성까지는 같다고는 할 수 없다.(가리키는 타입의 인스턴스가 서로 다름)
+- 하지만 두 변수나 상수가 메모리에서 같은 인스턴스를 가리키면 서로 동일하다고 할 수 있다.
+
+
+
+### 무엇을 사용해야 할까?
+
+1. 값을 전달하는 타입이 필요하다면 **구조체** 를 사용한다. 그래야 함수의 인수로 대입될때나 전달될 때 타입이 복사된다.
+2. 서브클래스에서 상속해야 하는 타입이 아니라면 **구조체** 를 사용한다. 구조체는 상속을 지원하지 않으므로 서브클래스가 존재할 수 없다.
+3. 타입으로 표현해야 할 동작이 비교적 직관적이고 단순 값 몇 가지를 포함하는 경우에는 **구조체** 가 어울린다. 나중에 이 타입을 클래스로 변경해도 늦지 않다.
+4. 나머지 경우에는 **클래스** 를 사용한다.
+
+
+
+### 쓰기 시 복사(Copy on write)
+
+- 값 타입의 복사 동작에 어떤 성능상 장점이 있는지 궁금할 것이다.
+
+- 예를 들어 Array 타입을 함수에 전달하거나 새 상수나 변수에 대입할 때마다 Array의 새 복사본이 생긴다면 복사본이 많이 생겨 낭비이지 않을까?
+
+  - 실제로는 데이터에 따라 그리고 데이터를 어떻게 사용하느냐에 따라 다른다
+  - Swift의 표준 라이브러리에 저공되는 값 타입은 **쓰기 시 복사(copy on write)** 로 구현되어 있다.
+
+- 쓰기 시 복사(copy on write), 즉 COW는 값 타입의 기본 저장 대상을 암묵적으로 공유하는 것을 가리킨다.
+
+  - 이 최적화 방법을 적용하면 값 타입의 인스턴스들은 기본 저장 대상을 공유한다.
+
+  - *다시 말해 각 인스턴스는 데이터의 자체 복사본을 가지지 않고, 데이터의 자체 참조만을 유지한다.*
+  - 나중에 인스턴스가 데이터를 변경하면, 즉 데이터에 쓰기를 수행하면, 그때 자체 복사본을 가진다는 것이다. 
+  - **값 타입의 불필요한 데이터 복사를 방지하는 수단이다.**
+
