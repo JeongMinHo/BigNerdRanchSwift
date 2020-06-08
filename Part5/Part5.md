@@ -183,14 +183,261 @@ protocol MyProtocol: MyOtherProtocol, CustomStringConvertible {
 
 
 
+# CHAPTER 20(오류 처리)
 
 
 
+### 오류의 범주
+
+- 오류는 **바로잡을 수 있는(recoverable)** 것과 **바로잡지 못하는(nonrecoverable)** 것, 이렇게 크게 두 범주로 구분할 수 있다.
+- 바로잡을 수 있는 오류에는 대처 준비를 해야 하는 이벤트들이 포함된다.
+  1. 존재하지 않는 파일을 열려고 시도하는 것
+  2. 다운된 서버와 통신하려고 시도하는 것
+  3. 인터넷에 연결되지 않은 기기와 통신하려고 시도하는 것
+- Swift는 바로잡을 수 있는 오류들을 처리할 수 있는 도구를 다양하게 제공하고 있다. 
+  - 호출된 함수가 바로잡을 수 있는 오류로 인해 오동작한다면 그 원인을 찾아야 한다.
+  - 바로잡을 수 없는 오류는 일종의 **버그** 와도 같다. 예시로는 *nil이 포함된 옵셔널의 강제 언래핑, 배열의 끝을 넘어 요소에 접근하려는 것 등이 있다.*
 
 
 
+### 입력 문자열 분석하기
+
+- **수식 해석의 1단계는 렉스(lex, 문자열 분석)이다.** 렉스는 입력을 일련의 토큰으로 변환하는 과정을 말한다.
+- **토큰(token)은 의미를 가진 무엇이다.** 
+- 렉스는 *토근화* 라고도 불린다. 컴파일러에 의미가 없던 입력을 일련의 의미 있는 토큰으로 변환하기 때문이다.
+
+~~~swift
+enum Token {
+    case number(Int)
+    case plus
+}
+
+class Lexer {
+    let input: String
+    var position: String.Index
+    
+    init(input: String) {
+        self.input = input
+        self.position = self.input.startIndex
+    }
+    
+    func peek() -> Character? {
+        guard position < input.endIndex else {
+            return nil
+        }
+        return input[position]
+    }
+}
+~~~
+
+- assert(_:_:)의 첫 번째 인수는 검사할 조건이다. 이 조건이 true가 되면 아무 일도 일어나지 않는다. 하지만 false가 되면 프로그램은 두 번째 인수에 해당하는 메세지를 출력하며 디버거에서 함정에 빠지게 된다.
+- assert 호출은 프로그램이 디버그 모드로 빌드된 경우에만 사용된다. **디버그 모드는 플레이그라운드에서 작업하거나 Xcode에서 프로젝트를 실행할 때 기본 값이다. 릴리스 모드는 앱을 빌드해 앱 스토어에 배보할 때 Xcode가 사용하는 모드다.** 
+  - 릴리스 모드에서 앱을 빌드하면 수많은 컴파일러 최적화 기능이 활성화되고 assert() 호출은 전부 제거 된다.
+  - 릴리스 모드에서도 assert()를 유지하려면 이와 같은 precondition()을 사용한다. 
+  - precondition()은 릴리스 모드에서 앱이 빌드될 때 제거되지 않지만, assert()와 인수도 같고 결과도 같다.
+- 그렇다면 왜 guard나 다른 오류 처리 메커니즘을 놔두고 assert()를 사용할까? 
+  - assert와 그 파트너 격인 precondition()은 바로잡을 수 없는 오류를 잡아내기 위한 도구다. 
+  - 입력 문자열의 endIndex를 지나 진행하려고 하면 디버거가 endIndex에서 멈춰 오류를 찾아낼 수 있도록 하기 때문이다.
+  - asssert()를 사용하지 않으려면 렉서의 위치를 앞당기지 않거나 오류를 출력하지 말아야 하는데, 이는 둘 다 말이 안된다.
+
+~~~swift
+enum Token {
+    case number(Int)
+    case plus
+}
+
+class Lexer {
+    let input: String
+    var position: String.Index
+    
+    enum Error: Swift.Error {
+        case invalidCharacter(Character)
+    }
+    
+    init(input: String) {
+        self.input = input
+        self.position = self.input.startIndex
+    }
+    
+    func getNumber() -> Int {
+        var value = 0
+        
+        while let nextCharacter = peek() {
+            switch nextCharacter {
+            case "0"..."9":
+                let digitValue = Int(String(nextCharacter))
+                value = 10 * value + (digitValue ?? 0)
+                advance()
+            default:
+                return value
+            }
+        }
+        return value
+    }
+    
+    func peek() -> Character? {
+        guard position < input.endIndex else {
+            return nil
+        }
+        return input[position]
+    }
+    
+    func advance() {
+        assert(position < input.endIndex, "Cannot advance past endIndex!")
+        position = input.index(after: position)
+    }
+    
+    func lex() throws -> [Token] {
+        var tokens = [Token]()
+        
+        while let nextCharacter = peek() {
+            switch nextCharacter {
+            case "0"..."9":
+                let value = getNumber()
+                tokens.append(.number(value))
+            case "+":
+                advance()
+            case " ":
+                advance()
+            default:
+                throw Lexer.Error.invalidCharacter(nextCharacter)
+            }
+        }
+        return tokens
+    }
+}
+
+func evaluate(_ input: String) {
+    print("Evaluating: \(input)")
+    let lexer = Lexer(input: input)
+    
+    do {
+        let tokens = try lexer.lex()
+        print("Lexer output: \(tokens)")
+    } catch {
+        print("An error occured : \(error)")
+    }
+}
+~~~
 
 
 
+### 오류 잡아내기
 
-- 
+- Swift가 오류를 처리하기 위해 사용하는 제어 구조에는 **do/catch** 가 있다.
+
+  - *이 안에 적어도 하나의 try 구문이 do 에 있어야 한다.*
+
+- ~~~swift
+  do {
+          let tokens = try lexer.lex()
+          print("Lexer output: \(tokens)")
+      } catch {
+          print("An error occured : \(error)")
+      }
+  ~~~
+
+- do는 새 영역(scope)를 만드는데, 이는 마치 if와 흡사하다. do 영역 안에서는 print()를 호출하는 것처럼 평상시대로 코드를 작성하면 된다.
+
+- 또한 throws가 지정된 함수나 메서드로 호출할 수 있다. 이런 호출은 try 키워드로 지정해야 한다.
+
+- do 블록 끝에는 catch 블록을 둔다. do 블록 안에 있는 try 호출 중에서 어느 하나라도 오류를 던지면 catch 블록이 실행되고, 이때 던져진 오류의 값은 상수 error에 바인딩 된다.
+
+
+
+### Token 배열 파싱하기
+
+- 입력 문자열을 Token 배열로 변환해 보겠다. Token 배열의 요소는 .number 또는 .plus 둘 중 하나이다. 그 다음은 전달받은 일련의 토큰을 판단하는 파서를 작성하는 단계이다.
+  - 예를 들어 [.number(5), .plus, ,number(3)]이 전달되면 8이 출력되어야 한다.
+
+~~~swift
+func getNextToken() -> Token? {
+        guard position < tokens.count else {
+            return nil
+        }
+        let token = tokens[position]
+        position += 1
+        return token
+    }
+    
+    func getNumber() throws -> Int {
+        guard let token = getNextToken() else {
+            throw Parser.Error.unexpectedEndOfInput
+        }
+        
+        switch token {
+        case .number(let value):
+            return value
+        case .plus:
+            throw Parser.Error.invalidToken(token)
+        }
+    }
+~~~
+
+- getNumber() 메서드에 **thorws -> Int** 라는 표현이 보인다. 
+  - 따라서 이 메서드가 보통은 Int를 리턴하지만, 오류를 던질 수도 있는 함수임을 알 수 있다.
+
+~~~swift
+func parse() throws -> Int {
+        var value = try getNumber()
+        
+        while let token = getNextToken() {
+            switch token {
+            case .plus:
+                let nextNumber = try getNumber()
+                value += nextNumber
+                
+            case .number:
+                throw Parser.Error.invalidToken(token)
+            }
+        }
+        return value
+    }
+~~~
+
+- getNumber() 호출에 try 키워드를 붙여 놓았는데, Swift에서는 getNumber()가 던지기용 메서드여야 하기 때문이다. 하지만 do/catch 블록을 사용하지는 않았다. 
+  - 여기서는 do 블록 없이도 try를 사용할 수 있는 이유는 무엇일까?
+    - Swift에서 try가 붙은 모든 호출은 '오류를 처리' 한다. 오류 처리는 evaluate() 처럼 오류를 잡아내는 것이다. 
+    - 하지만 오류를 처리할 수 있는 다른 방법이 또 있다. *던지는 것이다.*
+    - parse()는 그 자체로 던지기용 메서드이므로 do/catch 없이도 try 호출을 그 안에 넣을 수 있다. try 호출이 실패하면 parse()가 오류를 다시 던진다.
+
+
+
+### 눈 가리고 아웅 격으로 오류 처리하기
+
+- **오류를 던질 수도 있는 함수를 호출할 때는, try를 붙였고, try를 붙여 호추하는 코드는 do/catch 블록 안이나 함수 자체에 throws가 붙은 함수안에 들어가야 한다.**
+
+- **try!!** 키워드는 옵셔널의 강제 언래핑처럼 강제 키워드인 try!를 적용하면 오류가 던져질 때 프로그램이 함정에 빠진다.
+
+  - 우리는 앞에서 강제 언래핑과 암묵적으로 언래핑된 옵셔널은 피하는 것이 좋다고 했다.
+  - *try! 는 그보다 훨씬 더 피해야 한다고 권고한다.*
+
+- 오류가 일어날 때 함정에 빠지지 않고 오류를 무시할 수 있는 try 종류가 있다.
+
+  - **try?** 로 던지기용 함수를 호출하면 함수가 리턴하던 타입이 무엇이든 그 타입의 옵셔널을 리턴값으로 가져온다.
+  - 다시 말해 guard 같은 것을 사용해야 그 옵셔널이 정말로 값을 가지고 있는지 확인할 수 있다.
+
+- ~~~swift
+  guard let tokens = try? lexer.lex() else {
+  	print("Lexing failed.")
+  	return
+  }
+  ~~~
+
+  - try?는 try! 보다 나쁘지는 않지만 사용하지 않는 것이 좋다. 
+    - try?로 함수를 호출하면 nil을 리턴받을 상황에 대비해야 한다. 
+    - **일반적으로는 catch에서 오류를 처리하는 것이 더 낫다. 함수가 던진 오류에 접근해야 하기 때문이다.**
+
+
+
+## Swift의 오류 처리 철학
+
+- Swift는 안전하고 읽기 쉬운 코드를 지향하도록 설계되었고, 그 오류 처리 체계도 마찬가지다. 잘못될 수도  있는 함수에는 **throws** 가 예외 없이 붙어야 한다. 그래야 함수의 타입을 보고 잠재적인 오류를 처리해아 하는지 알 수 있다.
+- Swift는 또한 잘못될 수도 있는 함수를 호출할 때 try를 붙이도록 하고 있다. 이렇게 하면 함수 호출에 try가 붙어 있으면 처리해야 하는 잠재적인 오류의 원인이 있다는 것을 알 수 있다. 이와 반대로 try가 없다면 처리해야 할 오류가 없다는 의미이다.
+- C++나 자바를 사용해 봤다면 Swift의 오류 처리 방식과 예외 기반 오류 처리 방식의 차이에 유의해야 한다.
+  - Swift가 try, catch, throw 같은 용어를 사용한다고 해서 오류 처리를 구현하는 데 예외를 적용하지는 않는다.
+  - 함수에 throws를 붙이면 그 함수의 리턴 타입을 원래 리턴하던 타입과 상관없이 '원래 리턴하던 타입이나 Error프로토콜의 인스턴스'로 효과적인 변경이 이뤄진다.
+- Swift에는 오류 처리 철학이 한 가지 더 있다.
+  - throws가 붙은 함수는 자신이 던질 오류의 종류를 나타내지 않는다는 것이다.
+    1. 우선 함수가 던질 수도 있는 잠재적 Error들을 함수의 API가 변경되지 않아도 언제든 추가할 수 있다.
+    2. catch로 오류를 처리할 때는 알 수 었는 오류를 처리할 준비를 갖춰 놓아야 한다.
