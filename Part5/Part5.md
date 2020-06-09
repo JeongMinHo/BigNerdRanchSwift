@@ -441,3 +441,144 @@ func parse() throws -> Int {
   - throws가 붙은 함수는 자신이 던질 오류의 종류를 나타내지 않는다는 것이다.
     1. 우선 함수가 던질 수도 있는 잠재적 Error들을 함수의 API가 변경되지 않아도 언제든 추가할 수 있다.
     2. catch로 오류를 처리할 때는 알 수 었는 오류를 처리할 준비를 갖춰 놓아야 한다.
+
+
+
+# CHAPTER 21(확장)
+
+- Swift의 표준 라이브러리 제공되는 특정 타입, 예를 들어 Double을 빈번하게 사용하여 애플리케이션을 개발한다고 할때, 만일 Double 타입이 우리의 앱에서 어떻게 사용되는지에 맞춰 추가 기능을 지원한다면 개발 과정이 더욱 수월해질 것이다.
+- *Swift는 **확장(extension)** 이라는 기능을 제공하여 기존 타입에 새로운 기능을 추가할 수 있도록 하고 있다.*
+  - 이를 바탕으로 구조체, 열거형, 클래스를 확장하는 것이 가능하다.
+- 타입에 확장을 적용할 수 있는 경우는 다음과 같다.
+  1. 계산형 프로퍼티
+  2. 새 이니셜라이저
+  3. 프로토콜 준수
+  4. 내장 타입
+
+
+
+### 기존 타입 확장하기
+
+~~~swift
+typealias Velocity = Double
+
+extension Velocity {
+    var kph: Velocity { return self * 1.60934 }
+    var mph: Velocity { return self }
+}
+~~~
+
+- **typealias** 키워드를 적용하면 Double 타입의 새 이름을 Velocity로 정의할 수 있다. 이를 사용하여 독해력을 높일 수 있다.
+
+- *extension 키워드는 Velocity 타입을 확장하겠다는 표시다.*
+
+~~~swift
+// 프로토콜 
+protocol Vehicle {
+    var topSpeed: Velocity { get }
+    var numberOfDoors: Int { get }
+    var hasFlatbed: Bool { get }
+}
+~~~
+
+- Vehicle은 세 개의 프로퍼티를 선언했다. 각 프로퍼티는 준수하는 타입을 요건으로 게터를 구현한다. 
+  - 이 프로토콜을 준수하는 타입은 자동차의 일반적 특징을 나타내는 이 프로퍼티들을 반드시 제공해야 한다.
+
+
+
+### 직접 만든 타입 확장하기
+
+~~~SWIFT
+// Car 구조체 정의
+struct Car {
+    let make: String
+    let model: String
+    let year: Int
+    let color: String
+    let nickname: String
+    var gasLevel: Double {
+        willSet {
+            precondition(newValue <= 1.0 && newValue >= 0.0 , "New value must be between 0 and 1.")
+        }
+    }
+}
+~~~
+
+- 확장은 서로 관련된 기능을 한데 묶을 수 있는 뛰어난 구조를 제공한다. 
+  - **서로 관련된 기능을 하나의 확장으로 묶으면 코드의 가독성이 높아지고 유지 보수도 수월해진다.** 
+  - 또한, 이 패턴은 그 인터페이스를 정돈하는 데도 도움이 된다.
+
+~~~swift
+extension Car: Vehicle {
+    var topSpeed: Velocity { return 100 }
+    var numberOfDoors: Int { return 4 }
+    var hasFlatbed: Bool { return false }
+}
+~~~
+
+- 프로토콜의 필수 프로퍼티를 확장의 몸체 코드에서 구현했다.
+
+
+
+### 확장이 적용된 이니셜라이저 추가하기
+
+- 앞에서 구조체에는 이니셜라이저를 직접 정의하지 않으면 멤버와이즈 이니셜라이저가 제공된다고 했다. 
+- 구조체의 멤버와이즈 이니셜라이저를 그대로 사용하면서도 새 이니셜라이저를 작성하려면 타입에 확장을 적용하고 이니셜라이저를 추가해야 한다.
+
+~~~swift
+extension Car {
+    init(make: String, model: String, year: Int) {
+        self.init(make: make, model: model, year: year, color: "Black": nickname: "N\A", gasLevel: 1.0)
+    }
+}
+
+var c = Car(make: "Ford", model: "Fusion", year: 2013)
+~~~
+
+- **Car의 새 확장에는 인스턴스의 make, model, year에 해당하는 인수만 받는 이니셜라이저가 추가되었다.**
+- 이 새 이니셜라이저 인수들은 Car 구조체에 공짜 멤버와이즈 이니셜라이저로 전달되고, 없는 인수에는 기본값이 전달된다. 
+  - 이 두 이니셜라이저를 함께 사용하면 Car 타입의 인스턴스는 프로퍼티 모두가 값을 가질 수 있다
+
+
+
+### 중첩된 타입과 확장
+
+- Swift의 확장은 중첩된 타입을 기존 타입에 추가할 수 있다. 예를 들어 열거형을 Car 구조체에 추가해 자동차의 종류를 구분할 수 있다.
+
+~~~swift
+extension Car {
+    enum Kind {
+        case coupe, sedan
+    }
+    
+    var kind: Kind {
+        if numberOfDoors == 2 {
+            return .coupe
+        } else {
+            return .sedan
+        }
+    }
+}
+~~~
+
+
+
+### 함수의 확장
+
+- 기존 타입을 함수에 지정하는 데 확장을 사용할 수도 있다.
+
+~~~swift
+extension Car {
+    mutating func emptyGas(by amount: Double) {
+        precondition(amount <= 1 && amount > 0 , "Amount to remove must be between 0 and 1.")
+        gasLevel -= amount
+    }
+    
+    mutating func fillGas() {
+        gasLevel = 1.0
+    }
+}
+~~~
+
+- 이 두 함수에는 mutating 키워드는 왜 붙었을까?
+  - Car 타입은 구조체다. 따라서 어떤 함수가 구조체에서 프로퍼티의 값을 변경하기 위해서는 반드시 mutating 키워드가 붙어야 한다.
