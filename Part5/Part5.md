@@ -582,3 +582,113 @@ extension Car {
 
 - 이 두 함수에는 mutating 키워드는 왜 붙었을까?
   - Car 타입은 구조체다. 따라서 어떤 함수가 구조체에서 프로퍼티의 값을 변경하기 위해서는 반드시 mutating 키워드가 붙어야 한다.
+
+
+
+# CHAPTER 22(제네릭)
+
+- 지금까지 작성했던 프로퍼티와 함수드른 모두 Int, String, Monster 등 구체적인 타입을 바탕으로 동작했다.
+  - Swift에서는 어떤 타입이든 배열을 만들어 담을 수 있다.
+  - Swift의 내장 타입, 예를 들어 [Int]나 [Double] 등으로 구성되는 배열뿐만 아니라 [Monster] 등 직접 만든 타입으로 구성되는 배열도 만들 수 있다.
+- 그렇다면 Array는 어떻게 구현되어 있을까? 그리고 다양한 타입이 같은 방식으로 동작하는 코드는 어떻게 작성할 수 있을까?
+  - **제네릭(Generic)** 을 이용하면 된다.
+
+
+
+### 제네릭 데이터 구조
+
+~~~swift
+// Stack을 제네릭으로 만들어보기
+
+struct Stack<Element> {
+    var items = [Element]()
+    
+    mutating func push(_ newItem: Element) {
+        items.append(newItem)
+    }
+    
+    mutating func pop() -> Element? {
+        guard !items.isEmpty else {
+            return nil
+        }
+        return items.removeLast()
+    }
+}
+~~~
+
+- **Element** 라는 일종의 **자리 맡기(placeholder) 타입** 을 Stack의 선언 부분에 추가했다.
+- Swift에서 제네릭을 선언하려면 **< >** 를 사용하여 묶고 타입 이름을 바로 표기한다.
+  - 부등호 기호 사이의 이름은 플레이스 홀더 타입인 <Element> 를 나타낸다. 
+  - Element라는 플레이스 홀더 타입은 Stack 구조체 안에서 사용이 가능하며, 그곳에 구체적인 타입이 적용된다. 따라서 프로퍼티 선언 부분을 포함하여 리턴값 타입 자리를 Element로 대체하면 된다.
+- Element 자리 맡기 타입이 실제로 어떤 타입으로 대체될지는 명시하지 않았기 때문에 컴파일러가 플레이스스홀더 타입을 구체적인 타입으로 대체하는 과정을 가리켜 **구체화(specialization)** 이라고 한다.
+
+~~~swift
+// intStack 구체화하기
+var intStack = Stack<Int>()
+~~~
+
+
+
+### 제니릭 함수와 메서드
+
+~~~swift
+func myMap<T,U>(_ items: [T], _ f: (T) -> (U)) -> [U] {
+    var result = [U]()
+    for item in items {
+        result.append(f(item))
+    }
+    return result
+}
+~~~
+
+- 기존의 구체적인 타입 대신 T와 U가 있는데, 이들 말고도 사용할 수 있는 기호나 구두점이 더 있다. T와 U는 플레이스 홀더 타입 두 가지를 각각 선언한다.
+
+<img width="1000" alt="스크린샷 2020-06-11 오후 12 18 35" src="https://user-images.githubusercontent.com/48345308/84341284-b02bbd00-abdd-11ea-8183-64b1cc6ff3dd.png">
+
+~~~swift
+let strings = ["one","minho","three"]
+let stringsLength = myMap(strings) { $0.count }
+print(stringsLength) // [3, 5, 5]
+~~~
+
+- myMap(_: _:)에 전달된 클로저는 items 배열에 포함된 타입과 일치하는 인수를 받아야 하지만 리턴값은 타입은 어떤 것도 될 수 있다.
+
+- 메서드도 제네릭이 될 수 있다. 심지어는 이미 제네릭인 타입 안에서도 가능하다.
+- 위의 myMap() 함수는 배열에만 동작하지만, Stack을 매핑할 수도 있다
+
+~~~swift
+struct Stack<Element> {
+    var items = [Element]()
+    
+    mutating func push(_ newItem: Element) {
+        items.append(newItem)
+    }
+    
+    mutating func pop() -> Element? {
+        guard !items.isEmpty else {
+            return nil
+        }
+        return items.removeLast()
+    }
+    
+	  // **
+    func map<U>(_ f: (Element) -> U) -> Stack<U> {
+        var mappedItems = [U]()
+        for item in items {
+            mappedItems.append(f(item))
+        }
+        return Stack<U>(items: mappedItems)
+    }
+}
+~~~
+
+
+
+## 타입 제한 조건
+
+ 
+
+​     
+
+ 
+
